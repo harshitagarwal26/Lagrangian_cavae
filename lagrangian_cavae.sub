@@ -1,0 +1,22 @@
+container_image = docker://hagarwal23/cavae:gpu2
+universe = container
+
+executable = run_training.sh
+transfer_input_files = Lagrangian_caVAE-main, run_training.sh
+
+output = training_logs/1000/train_out_$(Cluster)_$(Process).log
+error = training_logs/1000/train_$(Cluster)_$(Process).err
+log = training_logs/1000/train_$(Cluster)_$(Process).log
+
+transfer_output_files = Lagrangian_caVAE-main/logs/pend-lag-cavae/lightning_logs/version_0/checkpoints
+transfer_output_remaps = "checkpoints = /home/hagarwal23/799/checkpoints/pend-lag-cavae"
+
++WantGPULab = true
+gpus_minimum_capability = 8.0
+gpus_maximum_capability = 9.0
+
+request_gpus = 1
+request_memory = 4GB
+request_disk = 16GB
+
+queue 1

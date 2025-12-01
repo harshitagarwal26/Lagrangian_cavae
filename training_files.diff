@@ -1,0 +1,122 @@
+diff --git a/examples/acro_lag_cavae_trainer.py b/examples/acro_lag_cavae_trainer.py
+index f8cf9a9..26d6eb1 100644
+--- a/examples/acro_lag_cavae_trainer.py
++++ b/examples/acro_lag_cavae_trainer.py
+@@ -29,7 +29,7 @@ class Model(pl.LightningModule):
+ 
+     def __init__(self, hparams, data_path=None):
+         super(Model, self).__init__()
+-        self.hparams = hparams
++        self.save_hyperparameters(hparams)
+         self.data_path = data_path
+         self.T_pred = self.hparams.T_pred
+         self.loss_fn = torch.nn.MSELoss(reduction='none')
+@@ -172,6 +172,7 @@ class Model(pl.LightningModule):
+         loss = - lhood + kl_q + lambda_ * norm_penalty
+ 
+         logs = {'recon_loss': -lhood, 'kl_q_loss': kl_q, 'train_loss': loss, 'monitor': -lhood+kl_q}
++        self.log("monitor", logs["monitor"], on_step=False, on_epoch=True, batch_size=self.hparams.batch_size)
+         return {'loss':loss, 'log': logs, 'progress_bar': logs}
+ 
+     def configure_optimizers(self):
+@@ -194,13 +195,15 @@ def main(args):
+     model = Model(hparams=args, data_path=os.path.join(PARENT_DIR, 'datasets', 'acrobot-gym-image-dataset-rgb-u9-train.pkl'))
+ 
+     checkpoint_callback = ModelCheckpoint(monitor='monitor', 
+-                                          prefix=args.name+f'-T_p={args.T_pred}-', 
++                                          filename=args.name + f'-T_p={args.T_pred}' + '-{epoch}-{step}',
+                                           save_top_k=1, 
+-                                          save_last=True)
++                                          save_last=True,
++                                          save_on_train_epoch_end=True)
+     trainer = Trainer.from_argparse_args(args, 
+                                          deterministic=True,
+                                          default_root_dir=os.path.join(PARENT_DIR, 'logs', args.name),
+-                                         checkpoint_callback=checkpoint_callback)  
++                                         callbacks=[checkpoint_callback],
++                                         enable_checkpointing=True)
+     trainer.fit(model)
+ 
+ 
+diff --git a/examples/cart_lag_cavae_trainer.py b/examples/cart_lag_cavae_trainer.py
+index 39f0c56..0f50579 100644
+--- a/examples/cart_lag_cavae_trainer.py
++++ b/examples/cart_lag_cavae_trainer.py
+@@ -29,7 +29,7 @@ class Model(pl.LightningModule):
+ 
+     def __init__(self, hparams, data_path=None):
+         super(Model, self).__init__()
+-        self.hparams = hparams
++        self.save_hyperparameters(hparams)
+         self.data_path = data_path
+         self.T_pred = self.hparams.T_pred
+         self.loss_fn = torch.nn.MSELoss(reduction='none')
+@@ -163,6 +163,7 @@ class Model(pl.LightningModule):
+         loss = - lhood + kl_q + lambda_ * norm_penalty
+ 
+         logs = {'recon_loss': -lhood, 'kl_q_loss': kl_q, 'train_loss': loss, 'monitor': -lhood+kl_q}
++        self.log("monitor", logs["monitor"], on_step=False, on_epoch=True, batch_size=self.hparams.batch_size)
+         return {'loss':loss, 'log': logs, 'progress_bar': logs}
+ 
+     def configure_optimizers(self):
+@@ -185,13 +186,15 @@ def main(args):
+     model = Model(hparams=args, data_path=os.path.join(PARENT_DIR, 'datasets', 'cartpole-gym-image-dataset-rgb-u9-train.pkl'))
+ 
+     checkpoint_callback = ModelCheckpoint(monitor='monitor', 
+-                                          prefix=args.name+f'-T_p={args.T_pred}-', 
++                                          filename=args.name + f'-T_p={args.T_pred}' + '-{epoch}-{step}', 
+                                           save_top_k=1, 
+-                                          save_last=True)
++                                          save_last=True,
++                                          save_on_train_epoch_end=True)
+     trainer = Trainer.from_argparse_args(args, 
+-                                         deterministic=True,
++                                         deterministic=False,
+                                          default_root_dir=os.path.join(PARENT_DIR, 'logs', args.name),
+-                                         checkpoint_callback=checkpoint_callback) 
++                                         callbacks=[checkpoint_callback],
++                                         enable_checkpointing=True)
+     trainer.fit(model)
+ 
+ 
+diff --git a/examples/pend_lag_cavae_trainer.py b/examples/pend_lag_cavae_trainer.py
+index 42a4176..a0edf9b 100644
+--- a/examples/pend_lag_cavae_trainer.py
++++ b/examples/pend_lag_cavae_trainer.py
+@@ -28,7 +28,7 @@ class Model(pl.LightningModule):
+ 
+     def __init__(self, hparams, data_path=None):
+         super(Model, self).__init__()
+-        self.hparams = hparams
++        self.save_hyperparameters(hparams)
+         self.data_path = data_path
+         self.T_pred = self.hparams.T_pred
+         self.loss_fn = torch.nn.MSELoss(reduction='none')
+@@ -132,6 +132,7 @@ class Model(pl.LightningModule):
+         loss = - lhood + kl_q + lambda_ * norm_penalty
+ 
+         logs = {'recon_loss': -lhood, 'kl_q_loss': kl_q, 'train_loss': loss, 'monitor': -lhood+kl_q}
++        self.log("monitor", logs["monitor"], on_step=False, on_epoch=True, batch_size=self.hparams.batch_size)
+         return {'loss':loss, 'log': logs, 'progress_bar': logs}
+ 
+     def configure_optimizers(self):
+@@ -153,13 +154,15 @@ class Model(pl.LightningModule):
+ def main(args):
+     model = Model(hparams=args, data_path=os.path.join(PARENT_DIR, 'datasets', 'pendulum-gym-image-dataset-train.pkl'))
+     checkpoint_callback = ModelCheckpoint(monitor='monitor', 
+-                                          prefix=args.name+f'-T_p={args.T_pred}-', 
++                                          filename=args.name + f'-T_p={args.T_pred}' + '-{epoch}-{step}', 
+                                           save_top_k=1, 
+-                                          save_last=True)
++                                          save_last=True,
++                                          save_on_train_epoch_end=True)
+     trainer = Trainer.from_argparse_args(args, 
+-                                         deterministic=True,
++                                         deterministic=False,
+                                          default_root_dir=os.path.join(PARENT_DIR, 'logs', args.name),
+-                                         checkpoint_callback=checkpoint_callback) 
++                                         callbacks=[checkpoint_callback],
++                                         enable_checkpointing=True)
+     trainer.fit(model)
+ 
+ 
