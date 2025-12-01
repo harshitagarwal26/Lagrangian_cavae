@@ -15,9 +15,9 @@ These steps outline the process for submitting jobs to the CHTC cluster.
     * `restrict_to_horizontal.diff`
 
 2.  **Clone the Repository**
-    Clone the [Lagrangian_caVAE](https://github.com/DesmondZhong/Lagrangian_caVAE) repository into the same folder:
+    Clone the Lagrangian_caVAE repository into the same folder:
     ```bash
-    git clone [https://github.com/DesmondZhong/Lagrangian_caVAE](https://github.com/DesmondZhong/Lagrangian_caVAE)
+    git clone https://github.com/DesmondZhong/Lagrangian_caVAE.git
     ```
 
 3.  **Apply Training Patch**
@@ -36,14 +36,25 @@ cd ..
 ```
 
 **2. Restricted Horizontal Pendulum**
-To restrict the pendulum to the horizontal level:
-* Apply the specific patch inside the repo:
+To restrict the pendulum to the horizontal level, follow these additional steps:
+
+* **Apply the Patch:**
     ```bash
     cd Lagrangian_caVAE
     patch -p1 < ../restrict_to_horizontal.diff
     cd ..
     ```
-* Run the submission command:
+
+* **Update `run_training.sh`:**
+    Open `run_training.sh` and add the dataset generation command before the python training command:
+    ```bash
+    xvfb-run -s "-screen 0 1400x900x24" python datasets/pend_dataset.py
+    ```
+
+* **Consistency Check (Important):**
+    Ensure that the `.pkl` file name is identical in both `prepare_dataset.py` and `pend_lag_cavae_trainer.py`.
+
+* **Submit Job:**
     ```bash
     ./submit_cavae.sh pend_lag_cavae_trainer.py 1 1000
     ```
@@ -75,8 +86,18 @@ docker build -t hagarwal23/cavae:gpu2 .
 ### Step 2: Run the Container
 Launch the container (ensure NVIDIA Container Toolkit is installed):
 ```bash
-docker run -it hagarwal23/cavae:gpu2 /bin/bash
+docker run --gpus all -it hagarwal23/cavae:gpu2 /bin/bash
 ```
 
 ### Step 3: Execute Training
-Once inside the container, navigate to the code directory and run the training commands as described in the [Lagrangian_caVAE](https://github.com/DesmondZhong/Lagrangian_caVAE) repository.
+
+**For Standard Training:**
+Navigate to the code directory and run the training commands as described in the [Lagrangian_caVAE](https://github.com/DesmondZhong/Lagrangian_caVAE) repository.
+
+**For Restricted Horizontal Pendulum:**
+1.  Apply the patch (if not already applied).
+2.  Generate the dataset manually inside the container:
+    ```bash
+    xvfb-run -s "-screen 0 1400x900x24" python datasets/pend_dataset.py
+    ```
+3.  Proceed with the standard training command.
