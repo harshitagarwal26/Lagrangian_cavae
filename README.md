@@ -96,8 +96,19 @@ Navigate to the code directory and run the training commands as described in the
 
 **For Restricted Horizontal Pendulum:**
 1.  Apply the patch (if not already applied).
-2.  Generate the dataset manually inside the container:
+2.  Run:
+    ```bash
+    # 1. Point to archive repos (Fixes the 404 errors)
+    echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list
+    echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list
+    
+    
+    # 2. Update and install Xvfb AND OpenGL libraries
+    apt-get -o Acquire::Check-Valid-Until=false update
+    apt-get install -y xvfb python-opengl libgl1-mesa-glx
+    ```
+3.  Generate the dataset manually inside the container:
     ```bash
     xvfb-run -s "-screen 0 1400x900x24" python datasets/pend_dataset.py
     ```
-3.  Proceed with the standard training command.
+4.  Proceed with the standard training command.
