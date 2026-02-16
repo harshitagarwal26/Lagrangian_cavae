@@ -86,7 +86,7 @@ docker build -t hagarwal23/cavae:gpu2 .
 ### Step 2: Run the Container
 Launch the container (ensure NVIDIA Container Toolkit is installed):
 ```bash
-docker run --gpus all -it hagarwal23/cavae:gpu2 /bin/bash
+docker run --platform linux/amd64 -v $(pwd)/Lagrangian_caVAE-main:/Lagrangian_caVAE-main -it hagarwal23/cavae:gpu2 /bin/bash
 ```
 
 ### Step 3: Execute Training
